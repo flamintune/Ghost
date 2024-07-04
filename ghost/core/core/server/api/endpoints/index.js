@@ -117,6 +117,10 @@ module.exports = {
         return apiFramework.pipeline(require('./media'), localUtils);
     },
 
+    get s3PresignedUrl(){
+        return apiFramework.pipeline(require('./s3-presigned-url'),localUtils)
+    },
+
     get files() {
         return apiFramework.pipeline(require('./files'), localUtils);
     },
@@ -268,4 +272,5 @@ module.exports = {
     get recommendationsPublic() {
         return apiFramework.pipeline(require('./recommendations-public'), localUtils, 'content');
     }
+    
 };

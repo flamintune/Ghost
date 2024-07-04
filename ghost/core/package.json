@@ -57,6 +57,8 @@
     "cli": "^1.26.0"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.609.0",
+    "@aws-sdk/s3-request-presigner": "^3.609.0",
     "@extractus/oembed-extractor": "3.2.1",
     "@opentelemetry/api": "1.9.0",
     "@opentelemetry/auto-instrumentations-node": "0.47.1",
@@ -183,6 +185,7 @@
     "connect-slashes": "1.4.0",
     "cookie-session": "2.1.0",
     "cors": "2.8.5",
+    "dotenv": "^16.4.5",
     "downsize": "0.0.8",
     "express": "4.19.2",
     "express-brute": "1.0.1",

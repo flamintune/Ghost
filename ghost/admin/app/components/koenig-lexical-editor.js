@@ -533,7 +533,85 @@ export default class KoenigLexicalEditor extends Component {
 
             const _uploadFile = async (file, {formData = {}} = {}) => {
                 progressTracker.current[file] = 0;
-
+                if (type === "video" || type === "mediaThumbnail") {
+                    const getPresignedUrlEndpoint = `${ghostPaths().apiRoot}/get-s3-presigned-url`;
+            
+                    try {
+                        const presignedUrlResponse = await this.ajax.post(getPresignedUrlEndpoint, {
+                            data: {
+                                fileName: file.name,
+                                fileType: file.type
+                            }
+                        });
+            
+                        const { presignedUrl, fileUrl } = presignedUrlResponse.r2PresignedUrl[0];
+                        const uploadFile = async (file, presignedUrl, updateProgress) => {
+                            return new Promise((resolve, reject) => {
+                                const xhr = new XMLHttpRequest();
+                        
+                                xhr.open('PUT', presignedUrl, true);
+                                xhr.setRequestHeader('Content-Type', file.type);
+                        
+                                xhr.upload.onprogress = (event) => {
+                                    if (event.lengthComputable) {
+                                        const percent = (event.loaded / event.total) * 100;
+                                        updateProgress(file, percent);
+                                    }
+                                };
+                        
+                                xhr.onload = () => {
+                                    if (xhr.status >= 200 && xhr.status < 300) {
+                                        resolve({ success: true, file: file });
+                                    } else {
+                                        reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.statusText}`));
+                                    }
+                                };
+                        
+                                xhr.onerror = () => reject(new Error('Network error occurred during upload'));
+                                xhr.onabort = () => reject(new Error('Upload was aborted'));
+                        
+                                xhr.send(file);
+                            });
+                        };
+                        
+                        // 使用方法
+                        try {
+                            const result = await uploadFile(file, presignedUrl, (file, percent) => {
+                            });
+                        } catch (error) {
+                            console.error('Upload failed:', error.message);
+                            throw error
+                        }
+            
+                        progressTracker.current[file] = 100;
+                        updateProgress();
+                        
+                        return {
+                            url: fileUrl,
+                            fileName: file.name
+                        };
+            
+                    } catch (error) {
+                        console.error(error);
+            
+                        // 错误处理逻辑
+                        let message = error.payload?.errors?.[0]?.message || '';
+                        let context = error.payload?.errors?.[0]?.context || '';
+            
+                        if (!message) {
+                            message = error.message;
+                        }
+            
+                        const errorResult = {
+                            message,
+                            context,
+                            fileName: file.name
+                        };
+            
+                        throw errorResult;
+                    }
+                }
+                console.log("....")
                 const fileFormData = new FormData();
                 fileFormData.append('file', file, file.name);
 

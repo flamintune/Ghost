@@ -282,6 +282,8 @@ module.exports = function apiRoutes() {
         apiMw.upload.validation({type: 'images'}),
         http(api.media.uploadThumbnail)
     );
+    // ## s3
+    router.post('/get-s3-presigned-url', mw.authAdminApi,http(api.s3PresignedUrl.getPresignedUrl));
 
     // ## files
     router.post('/files/upload',
